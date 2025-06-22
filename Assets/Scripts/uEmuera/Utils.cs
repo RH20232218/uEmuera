@@ -310,7 +310,7 @@ namespace uEmuera
                                 }
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception)
                         {}
                     }
                     if (tokens.Length <= 1)

@@ -129,7 +129,7 @@ namespace MinorShift._Library
 		//   int nBottomRect, int nXRadial1, int nYRadial1, int nXRadial2, int nYRadial2);
 
 		static IntPtr hDC;
-		static Font lastFont = null;
+		//static Font lastFont = null;
 		static IntPtr defaulthFont;
 		static IntPtr defaulthBrush;
 		static IntPtr defaulthPen;
@@ -137,7 +137,7 @@ namespace MinorShift._Library
 		static Color lastBrushColor;
 		static Color lastPenColor;
 		static Size fontMetrics;
-		static bool usingStockBrush = false;
+		//static bool usingStockBrush = false;
 		static int devnull;
 		//static bool isNt = (System.Environment.OSVersion.Platform == PlatformID.Win32NT) ? true : false;
 		static GDI()
@@ -308,7 +308,7 @@ namespace MinorShift._Library
         #region MesureText用
 
         static IntPtr hDCMesureText;
-		static Font mtLastFont = null;
+		//static Font mtLastFont = null;
 		static IntPtr mtDefaulthFont;
 
 		static Size MeasureText98(string str, Font font)

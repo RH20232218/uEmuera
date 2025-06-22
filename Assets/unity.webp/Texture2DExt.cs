@@ -176,10 +176,10 @@ namespace WebP
         {
             List<byte[]> bytes_list = new List<byte[]>();
             lError = 0;
-            byte[] lRawData = null;
+            //byte[] lRawData = null;
             int lLength = lData.Length;
 
-            WebPAnimDecoderOptions config = new WebPAnimDecoderOptions();
+            //WebPAnimDecoderOptions config = new WebPAnimDecoderOptions();
             fixed (byte* p = lData)
             {
                 IntPtr ptr = (IntPtr)p;

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using MinorShift.Emuera;
 using MinorShift.Emuera.GameView;
+using uEmuera;
 
 public class EmueraContent : MonoBehaviour
 {
@@ -323,7 +324,6 @@ public class EmueraContent : MonoBehaviour
         dirty = true;
     }
     bool dirty = false;
-    uint last_click_tic = 0;
 
     void OnBeginDrag(UnityEngine.EventSystems.PointerEventData e)
     {

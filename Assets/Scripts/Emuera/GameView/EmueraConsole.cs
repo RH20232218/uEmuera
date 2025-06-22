@@ -163,8 +163,8 @@ namespace MinorShift.Emuera.GameView
 #region 1823 cbg関連
 		private readonly List<ClientBackGroundImage> cbgList = new List<ClientBackGroundImage>();
 		private GraphicsImage cbgButtonMap = null;
-		private int selectingCBGButtonInt = -1;
-		private int lastSelectingCBGButtonInt = -1;
+		//private int selectingCBGButtonInt = -1;
+		//private int lastSelectingCBGButtonInt = -1;
 		//ConsoleButtonString selectingButton = null;
 		//ConsoleButtonString lastSelectingButton = null;
 		class ClientBackGroundImage : IComparable<ClientBackGroundImage>
@@ -243,8 +243,8 @@ namespace MinorShift.Emuera.GameView
 		public void CBG_ClearBMap()
 		{
 			cbgButtonMap = null;
-			selectingCBGButtonInt = -1;
-			lastSelectingCBGButtonInt = -1;
+			//selectingCBGButtonInt = -1;
+			//lastSelectingCBGButtonInt = -1;
 		}
 
 		public bool CBG_SetGraphics(GraphicsImage gra, int x, int y, int zdepth)
@@ -276,8 +276,8 @@ namespace MinorShift.Emuera.GameView
 			if (cbgButtonMap == gra)
 				return false;
 			cbgButtonMap = gra;
-			selectingCBGButtonInt = -1;
-			lastSelectingCBGButtonInt = -1;
+			//selectingCBGButtonInt = -1;
+			//lastSelectingCBGButtonInt = -1;
 			return true;
 		}
 
@@ -525,13 +525,13 @@ namespace MinorShift.Emuera.GameView
 		/// <summary>
 		/// ToolTip表示したフラグ
 		/// </summary>
-		bool tooltipUsed = false;
+		//bool tooltipUsed = false;
 		/// <summary>
 		/// マウスの直下にあるテキスト。ボタンであってもよい。
 		/// ToolTip表示用。世代無視、履歴中も表示
 		/// </summary>
 		ConsoleButtonString pointingString = null;
-		ConsoleButtonString lastPointingString = null;
+		//ConsoleButtonString lastPointingString = null;
 		#endregion
 
 		#region Input & Timer系
@@ -1975,6 +1975,60 @@ namespace MinorShift.Emuera.GameView
 				timer.Dispose();
 			//timer = null;
 			//stringMeasure.Dispose();
+		}
+
+		internal void onMouseEnterCell(ConsoleButtonString button, Point point)
+		{
+			//if (button != lastPointingString)
+			//	NeedRedraw = true;
+			//lastPointingString = button;
+			if(button == null)
+			{
+				//if(tooltipUsed)
+				//{
+				//	tooltipUsed = false;
+				//	window.ClearToolTip();
+				//}
+				return;
+			}
+			//string tooltip = button.GetToolTipString();
+			//if (!string.IsNullOrEmpty(tooltip))
+			//{
+			//	tooltipUsed = true;
+			//	window.SetToolTip(button, tooltip);
+			//}
+			//else if(tooltipUsed)
+			//{
+			//	tooltipUsed = false;
+			//	window.ClearToolTip();
+			//}
+		}
+
+		private void selectButton(ConsoleButtonString button)
+		{
+			//if (button != lastSelectingButton)
+			//	NeedRedraw = true;
+			//lastSelectingButton = button;
+			if(button == null)
+			{
+				//if(tooltipUsed)
+				//{
+				//	tooltipUsed = false;
+				//	window.ClearToolTip();
+				//}
+				return;
+			}
+			//string tooltip = button.GetToolTipString();
+			//if (!string.IsNullOrEmpty(tooltip))
+			//{
+			//	tooltipUsed = true;
+			//	window.SetToolTip(button, tooltip);
+			//}
+			//else if(tooltipUsed)
+			//{
+			//	tooltipUsed = false;
+			//	window.ClearToolTip();
+			//}
 		}
 	}
 }
