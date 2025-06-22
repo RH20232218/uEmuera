@@ -361,6 +361,7 @@ internal static class SpriteManager
                 texture_dict.Remove(tinfo.imagename);
                 tinfo = null;
 
+                Resources.UnloadUnusedAssets();
                 GC.Collect();
             }
         }

@@ -118,7 +118,7 @@ public abstract class EmueraBehaviour : MonoBehaviour
                 ud.width = 0;
                 ud.color = FontColor;
                 ud.monospaced = true;
-                StringBuilder content = new StringBuilder();
+                var content = StringBuilderPool.Get();
                 for(int si = 0; si < btnlength; ++si)
                 {
                     var s = btn.StrArray[si];
@@ -220,6 +220,9 @@ public abstract class EmueraBehaviour : MonoBehaviour
                 ud.richedit = richedit;
 
                 units.Add(ud);
+
+                // Return builder to pool
+                StringBuilderPool.Release(content);
             }
         }
         /// <summary>
