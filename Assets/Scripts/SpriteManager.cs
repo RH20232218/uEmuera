@@ -337,7 +337,7 @@ internal static class SpriteManager
         {
             do
             {
-                yield return new WaitForSeconds(15.0f);
+                yield return waitYield15s;
             } while(texture_dict.Count == 0);
 
             var now = Time.unscaledTime;
@@ -371,7 +371,7 @@ internal static class SpriteManager
         {
             do
             {
-                yield return new WaitForSeconds(15);
+                yield return waitYield15s;
             } while(texture_other_threads.Count == 0
                 && render_texture_other_threads.Count == 0);
 
@@ -451,4 +451,7 @@ internal static class SpriteManager
         new Dictionary<string, List<CallbackInfo>>();
     static Dictionary<string, TextureInfo> texture_dict =
         new Dictionary<string, TextureInfo>();
+
+    // Cached wait instruction shared across coroutines
+    static readonly WaitForSeconds waitYield15s = new WaitForSeconds(15f);
 }

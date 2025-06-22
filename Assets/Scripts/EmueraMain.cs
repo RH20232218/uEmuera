@@ -124,7 +124,7 @@ public class EmueraMain : MonoBehaviour
     bool working_ = false;
 
     public bool debug = false;
-    public bool use_coroutine = false;
+    public bool use_coroutine = true;
 
 #if UNITY_EDITOR
     public string input;

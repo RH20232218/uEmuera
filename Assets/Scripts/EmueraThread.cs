@@ -120,7 +120,7 @@ public class EmueraThread
                     input = "";
                 console.PressEnterKey(skipflag, input, false);
             }
-            yield return new WaitForSeconds(0.01f);
+            yield return waitYield10ms;
             input = null;
         }
     }
@@ -130,4 +130,7 @@ public class EmueraThread
     bool running;
     string input;
     bool skipflag;
+
+    // Cached WaitForSeconds instance to avoid GC allocations each iteration
+    static readonly WaitForSeconds waitYield10ms = new WaitForSeconds(0.01f);
 }

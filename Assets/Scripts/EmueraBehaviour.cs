@@ -100,7 +100,10 @@ public abstract class EmueraBehaviour : MonoBehaviour
         }
         public void Update()
         {
-            units = new List<UnitDesc>();
+            if(units == null)
+                units = new List<UnitDesc>();
+            else
+                units.Clear();
 
             var Buttons = display_line.Buttons;
             for(int i = 0; i < Buttons.Length; ++i)
