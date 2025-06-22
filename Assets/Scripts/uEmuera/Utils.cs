@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace uEmuera
 {
@@ -374,5 +376,10 @@ namespace uEmuera
         }
         static Dictionary<string, string> content_files = null;
         static Dictionary<string, string[]> resource_csv_lines_ = null;
+
+        public static void SetGray(this Button button, bool gray)
+        {
+            button.interactable = !gray;
+        }
     }
 }
