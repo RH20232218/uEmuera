@@ -1,4 +1,4 @@
-using uEmuera.Drawing;
+﻿using uEmuera.Drawing;
 
 namespace MinorShift.Emuera.GameView
 {

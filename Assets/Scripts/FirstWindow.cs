@@ -135,7 +135,7 @@ public class FirstWindow : MonoBehaviour
                     AddItem(path.Substring(workspace.Length + 1), workspace);
             }
         }
-        catch(DirectoryNotFoundException e)
+        catch(DirectoryNotFoundException)
         { }
     }
 

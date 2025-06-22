@@ -361,7 +361,7 @@ public class EmueraContent : MonoBehaviour
             background.enabled = false;
         else
             background.enabled = true;
-        background.color = new Color32(color.R, color.G, color.B, color.A);
+        background.color = new Color32((byte)color.R, (byte)color.G, (byte)color.B, (byte)color.A);
     }
 
     public void Ready()
@@ -424,7 +424,16 @@ public class EmueraContent : MonoBehaviour
         console_lines_.Add(line_desc);
         end_index++;
 
-        var w = line_desc.posx + line_desc.width;
+        float w = 0;
+        if (line_desc.units != null)
+        {
+            foreach (var unit in line_desc.units)
+            {
+                var unit_end_x = unit.posx + unit.width;
+                if (w < unit_end_x)
+                    w = unit_end_x;
+            }
+        }
         if (content_width < w)
             content_width = w;
 
@@ -515,7 +524,7 @@ public class EmueraContent : MonoBehaviour
 
     public void ShowIsInProcess(bool value)
     {
-        option_window.ShowIsInProcess(value);
+        option_window.ShowInProgress(value);
     }
 
     public void SetLastButtonGeneration(int generation)
@@ -528,7 +537,7 @@ public class EmueraContent : MonoBehaviour
         while (display_iter.MoveNext())
         {
             var image = display_iter.Current.Value;
-            var button = image.GetComponent<EmueraButton>();
+            var button = image.GetComponent<Button>();
             if (button != null)
                 button.SetGray(true);
         }
@@ -609,7 +618,7 @@ public class EmueraContent : MonoBehaviour
     void PushLine(EmueraLine line)
     {
         line.gameObject.SetActive(false);
-        var button = line.GetComponent<EmueraButton>();
+        var button = line.GetComponent<Button>();
         if(button != null)
             GameObject.Destroy(button);
         cache_lines_.Enqueue(line);
@@ -637,7 +646,7 @@ public class EmueraContent : MonoBehaviour
     void PushImageContainer(EmueraImage image)
     {
         image.gameObject.SetActive(false);
-        var button = image.GetComponent<EmueraButton>();
+        var button = image.GetComponent<Button>();
         if (button != null)
             GameObject.Destroy(button);
         cache_image_containers_.Push(image);
