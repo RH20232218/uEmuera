@@ -149,7 +149,7 @@ public static class GenericUtils
         return fullname;
     }
 
-    public static UnityEngine.Color ToUnityColor(this uEmuera.Drawing.Color color)
+    public static UnityEngine.Color ToUnityColor(uEmuera.Drawing.Color color)
     {
         return new UnityEngine.Color(color.r, color.g, color.b, color.a);
     }
@@ -182,18 +182,15 @@ public static class GenericUtils
     {
         public virtual void OnPointerClick(PointerEventData eventData)
         {
-            // Cache callbacks to avoid modification during iteration
-            if (callbacks1.Count > 0)
-            {
-                foreach (var callback in callbacks1)
-                    callback();
-            }
+            var _callbacks1 = callbacks1;
+            var iter = _callbacks1.GetEnumerator();
+            while(iter.MoveNext())
+                iter.Current();
 
-            if (callbacks2.Count > 0)
-            {
-                foreach (var callback in callbacks2)
-                    callback(eventData);
-            }
+            var _callbacks2 = callbacks2;
+            var iter2 = _callbacks2.GetEnumerator();
+            while(iter2.MoveNext())
+                iter2.Current(eventData);
         }
         void OnDestroy()
         {
@@ -259,11 +256,9 @@ public static class GenericUtils
     {
         public virtual void OnPointerDown(PointerEventData eventData)
         {
-            if (callbacks.Count > 0)
-            {
-                foreach (var callback in callbacks)
-                    callback(eventData);
-            }
+            var iter = callbacks.GetEnumerator();
+            while(iter.MoveNext())
+                iter.Current(eventData);
         }
         void OnDestroy()
         {
@@ -303,11 +298,9 @@ public static class GenericUtils
     {
         public virtual void OnPointerUp(PointerEventData eventData)
         {
-            if (callbacks.Count > 0)
-            {
-                foreach (var callback in callbacks)
-                    callback(eventData);
-            }
+            var iter = callbacks.GetEnumerator();
+            while(iter.MoveNext())
+                iter.Current(eventData);
         }
         void OnDestroy()
         {
@@ -348,11 +341,9 @@ public static class GenericUtils
     {
         public virtual void OnBeginDrag(PointerEventData eventData)
         {
-            if (callbacks.Count > 0)
-            {
-                foreach (var callback in callbacks)
-                    callback(eventData);
-            }
+            var iter = callbacks.GetEnumerator();
+            while(iter.MoveNext())
+                iter.Current(eventData);
         }
         void OnDestroy()
         {
@@ -364,11 +355,9 @@ public static class GenericUtils
     {
         public virtual void OnDrag(PointerEventData eventData)
         {
-            if (callbacks.Count > 0)
-            {
-                foreach (var callback in callbacks)
-                    callback(eventData);
-            }
+            var iter = callbacks.GetEnumerator();
+            while(iter.MoveNext())
+                iter.Current(eventData);
         }
         void OnDestroy()
         {
@@ -380,11 +369,9 @@ public static class GenericUtils
     {
         public virtual void OnEndDrag(PointerEventData eventData)
         {
-            if (callbacks.Count > 0)
-            {
-                foreach (var callback in callbacks)
-                    callback(eventData);
-            }
+            var iter = callbacks.GetEnumerator();
+            while(iter.MoveNext())
+                iter.Current(eventData);
         }
         void OnDestroy()
         {
@@ -548,7 +535,7 @@ public static class GenericUtils
         return md5s;
     }
     /// <summary>
-    /// 处理中间的'：'
+    /// 处理中间的‘：’
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>

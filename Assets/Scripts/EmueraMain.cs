@@ -34,7 +34,7 @@ public class EmueraMain : MonoBehaviour
         ConfigData.Instance.Clear();
         SpriteManager.ForceClear();
 
-        //System.GC.Collect();
+        System.GC.Collect();
 
         var async = Resources.UnloadUnusedAssets();
         while(!async.isDone)
@@ -67,7 +67,7 @@ public class EmueraMain : MonoBehaviour
 
         MinorShift.Emuera.Content.AppContents.UnloadContents();
         ConfigData.Instance.Clear();
-        //System.GC.Collect();
+        System.GC.Collect();
 
         yield return null;
         EmueraThread.instance.Start(debug, use_coroutine);
@@ -105,7 +105,7 @@ public class EmueraMain : MonoBehaviour
         }
 
 #if UNITY_EDITOR
-        if(Input.anyKeyDown)
+        if(Input.anyKey)
             EmueraThread.instance.Input("", false);
         if(!string.IsNullOrEmpty(input))
         {

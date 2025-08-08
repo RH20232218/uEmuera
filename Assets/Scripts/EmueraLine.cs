@@ -50,26 +50,6 @@ public class EmueraLine : EmueraBehaviour
     UnityEngine.UI.ContentSizeFitter size_fitter_ = null;
     GenericUtils.PointerClickListener click_handler_ = null;
 
-#if UNITY_STANDALONE
-    public UnityEngine.UI.Button button
-    {
-        get
-        {
-            if (button_ == null)
-            {
-                button_ = GetComponent<UnityEngine.UI.Button>();
-                if (button_ == null)
-                    button_ = gameObject.AddComponent<UnityEngine.UI.Button>();
-                var colors = button_.colors;
-                colors.highlightedColor = Config.FocusColor.ToUnityColor();
-                button_.colors = colors;
-            }
-            return button_;
-        }
-    }
-    UnityEngine.UI.Button button_ = null;
-#endif
-
     /// <summary>
     /// 更新内容
     /// </summary>
@@ -84,14 +64,10 @@ public class EmueraLine : EmueraBehaviour
         text.color = ud.color;
         text.supportRichText = ud.richedit;
 
-        var isButtonActive = ud.isbutton && ud.generation >= EmueraContent.instance.button_generation;
-        if(isButtonActive)
+        if(ud.isbutton && ud.generation >= EmueraContent.instance.button_generation)
         {
             click_handler_.enabled = true;
             text.raycastTarget = true;
-#if UNITY_STANDALONE
-            button.enabled = true;
-#endif
 #if UNITY_EDITOR
             code = ud.code;
             generation = ud.generation;
@@ -101,24 +77,24 @@ public class EmueraLine : EmueraBehaviour
         {
             click_handler_.enabled = false;
             text.raycastTarget = false;
-#if UNITY_STANDALONE
-            button.enabled = false;
-#endif
         }
 
-        // Cache font lookup to avoid repeated calls
-        var targetFont = FontUtils.default_font;
+        var font = FontUtils.default_font;
         if(ud.fontname != null)
-            targetFont = FontUtils.GetFont(ud.fontname);
-        if(text.font != targetFont)
-            text.font = targetFont;
+            font = FontUtils.GetFont(ud.fontname);
+        if(text.font != font)
+            text.font = font;
 
         monospaced_.enabled = ud.monospaced;
 
         logic_y = line_desc.position_y;
         logic_height = line_desc.height;
 
-        var sizefitter = (ud.isbutton || line_desc.units.Count > 1);
+        var sizefitter = false;
+        if(ud.isbutton || line_desc.units.Count > 1)
+            sizefitter = true;
+        else
+            sizefitter = false;
         if(sizefitter)
         {
             size_fitter.horizontalFit =
@@ -128,10 +104,7 @@ public class EmueraLine : EmueraBehaviour
         {
             size_fitter.horizontalFit =
                 UnityEngine.UI.ContentSizeFitter.FitMode.Unconstrained;
-            // Cache rect transform and reuse Vector2 when possible
-            var rectTransform = text_.rectTransform;
-            if (rectTransform.sizeDelta.x != Width || rectTransform.sizeDelta.y != 0)
-                rectTransform.sizeDelta = new Vector2(Width, 0);
+            text_.rectTransform.sizeDelta = new Vector2(Width, 0);
         }
 
         if(unit_desc.underline)
@@ -148,11 +121,9 @@ public class EmueraLine : EmueraBehaviour
                 underline_.anchorMax = new Vector2(0, 1);
                 underline_.localScale = Vector3.one;
                 //underline_.position = transform.position + new Vector3(0, 1 - font.fontSize);
-                underline_.anchoredPosition = new Vector2(0, - targetFont.fontSize - 1);
+                underline_.anchoredPosition = new Vector2(0, - font.fontSize - 1);
             }
-            // Cache sizeDelta assignment
-            if (underline_.sizeDelta.x != Width || underline_.sizeDelta.y != 1)
-                underline_.sizeDelta = new Vector2(Width, 1);
+            underline_.sizeDelta = new Vector2(Width, 1);
             underline_.GetComponent<UnityEngine.UI.Image>().color = unit_desc.color;
             underline_.gameObject.SetActive(true);
         }
@@ -173,11 +144,9 @@ public class EmueraLine : EmueraBehaviour
                 strickout_.anchorMax = new Vector2(0, 1);
                 strickout_.localScale = Vector3.one;
                 //strickout_.position = transform.position + new Vector3(0, - font.fontSize / 2.0f);
-                strickout_.anchoredPosition = new Vector2(0, - targetFont.fontSize / 2.0f);
+                strickout_.anchoredPosition = new Vector2(0, - font.fontSize / 2.0f);
             }
-            // Cache sizeDelta assignment
-            if (strickout_.sizeDelta.x != Width || strickout_.sizeDelta.y != 1)
-                strickout_.sizeDelta = new Vector2(Width, 1);
+            strickout_.sizeDelta = new Vector2(Width, 1);
             strickout_.GetComponent<UnityEngine.UI.Image>().color = unit_desc.color;
             strickout_.gameObject.SetActive(true);
         }

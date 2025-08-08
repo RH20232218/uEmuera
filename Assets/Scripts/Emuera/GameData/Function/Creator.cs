@@ -147,6 +147,9 @@ namespace MinorShift.Emuera.GameData.Function
                 ["HTML_TOPLAINTEXT"] = new HtmlToPlainTextMethod(),
                 ["HTML_ESCAPE"] = new HtmlEscapeMethod(),
 
+                // EM/EE compat: provide length of plain text rendered from HTML
+                ["HTML_STRINGLEN"] = new HtmlStringLenMethod(),
+
 
                 //画像処理系
                 ["SPRITECREATED"] = new SpriteStateMethod(),
@@ -207,7 +210,20 @@ namespace MinorShift.Emuera.GameData.Function
 
                 ["SPRITEANIMECREATE"] = new SpriteAnimeCreateMethod(),
                 ["SPRITEANIMEADDFRAME"] = new SpriteAnimeAddFrameMethod(),
-                ["SETANIMETIMER"] = new SetAnimeTimerMethod()
+                ["SETANIMETIMER"] = new SetAnimeTimerMethod(),
+
+                // EM/EE basic vars
+                ["GETVAR"] = new GetVarMethod(),
+                ["EXISTVAR"] = new ExistVarMethod(),
+
+                // EM/EE map/xml stubs used by scripts (return safe defaults)
+                ["MAP_HAS"] = new MapHasMethod(),
+                ["MAP_EXIST"] = new MapExistMethod(),
+                ["MAP_GET"] = new MapGetMethod(),
+                ["XML_EXIST"] = new XmlExistMethod(),
+                ["XML_GET_BYNAME"] = new XmlGetByNameMethod(),
+                ["ENUMFILES"] = new EnumFilesMethod(),
+                ["CLEARMEMORY"] = new ClearMemoryMethod()
             };
 
 
@@ -222,4 +238,34 @@ namespace MinorShift.Emuera.GameData.Function
 			return methodList;
 		}
 	}
+    
+    internal sealed class HtmlStringLenMethod : FunctionMethod
+    {
+        public HtmlStringLenMethod() : base()
+        {
+            minArg = 1;
+            argumentTypeArray = new Type[] { typeof(string), typeof(Int64) };
+        }
+        public override Type ReturnType { get { return typeof(Int64); } }
+        public override IOperandTerm CreateMethodTerm(IOperandTerm[] arguments)
+        {
+            return new MethodTerm(this, arguments);
+        }
+        public override string CheckArgumentType(string name, IOperandTerm[] arguments)
+        {
+            if (arguments == null || arguments.Length < 1) return name + ": 引数が足りません";
+            return base.CheckArgumentType(name, arguments);
+        }
+        public override object GetMethodValue(ExpressionMediator exm, IOperandTerm[] arguments)
+        {
+            string html = arguments[0].GetStrValue(exm);
+            // optional flag: treat as unicode length when nonzero
+            int mode = 0;
+            if (arguments.Length >= 2)
+                mode = (int)arguments[1].GetIntValue(exm);
+            string plain = MinorShift.Emuera.GameView.HtmlManager.HtmlToPlainText(html);
+            if (mode != 0) return (Int64)plain.Length;
+            return (Int64)MinorShift.Emuera.Sub.LangManager.GetStrlenLang(plain);
+        }
+    }
 }

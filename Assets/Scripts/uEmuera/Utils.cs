@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
 
 namespace uEmuera
 {
@@ -62,22 +60,19 @@ namespace uEmuera
         public static string NormalizePath(string path)
         {
             var ps = path.Split('/', '\\');
-            if (ps.Length == 1)
-                return ps[0];
-            if (ps.Length == 0)
-                return "";
-                
-            var sb = new System.Text.StringBuilder(path.Length);
+            var n = "";
             for(int i = 0; i < ps.Length - 1; ++i)
             {
                 var p = ps[i];
                 if(string.IsNullOrEmpty(p))
                     continue;
-                sb.Append(p);
-                sb.Append('/');
+                n = string.Concat(n, p, '/');
             }
-            sb.Append(ps[ps.Length - 1]);
-            return sb.ToString();
+            if(ps.Length == 1)
+                return ps[0];
+            else if(ps.Length > 0)
+                return n + ps[ps.Length - 1];
+            return "";
         }
 
         public static string GetSuffix(string filename)
@@ -130,10 +125,10 @@ namespace uEmuera
         public static int GetDisplayLength(string s, float fontsize)
         {
             float xsize = 0;
-            var length = s.Length; // Cache length to avoid repeated property access
-            for(int i = 0; i < length; ++i)
+            char c = '\x0';
+            for(int i = 0; i < s.Length; ++i)
             {
-                var c = s[i];
+                c = s[i];
                 if(CheckHalfSize(c))
                     xsize += fontsize / 2;
                 else
@@ -166,7 +161,7 @@ namespace uEmuera
             if(string.IsNullOrEmpty(str))
                 return 0;
             var count = 0;
-            var length = str.Length; // Cache length to avoid repeated property access
+            var length = str.Length;
             for(int i = 0; i < length; ++i)
             {
                 if(CheckHalfSize(str[i]))
@@ -310,7 +305,7 @@ namespace uEmuera
                                 }
                             }
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {}
                     }
                     if (tokens.Length <= 1)
@@ -376,10 +371,5 @@ namespace uEmuera
         }
         static Dictionary<string, string> content_files = null;
         static Dictionary<string, string[]> resource_csv_lines_ = null;
-
-        public static void SetGray(this Button button, bool gray)
-        {
-            button.interactable = !gray;
-        }
     }
 }

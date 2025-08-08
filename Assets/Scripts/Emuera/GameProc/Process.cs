@@ -193,7 +193,7 @@ namespace MinorShift.Emuera.GameProc
 				return false;
 			}
 			state.Begin(BeginType.TITLE);
-			//GC.Collect();
+			GC.Collect();
             return true;
 		}
 

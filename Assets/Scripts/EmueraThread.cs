@@ -62,7 +62,7 @@ public class EmueraThread
         MinorShift.Emuera.Program.Main(new string[0] { });
 
         uEmuera.Utils.ResourceClear();
-        //GC.Collect();
+        GC.Collect();
 
         input = null;
         var console = MinorShift.Emuera.GlobalStatic.Console;
@@ -97,7 +97,7 @@ public class EmueraThread
         MinorShift.Emuera.Program.Main(new string[0] { });
 
         uEmuera.Utils.ResourceClear();
-        //GC.Collect();
+        GC.Collect();
         yield return null;
 
         input = null;

@@ -20,6 +20,13 @@ namespace MinorShift.Emuera.GameData.Function
 
     internal static partial class FunctionMethodCreator
     {
+        // EM/EE compat: simple GETVAR/EXISTVAR methods backed by a global dictionary
+        static readonly System.Collections.Generic.Dictionary<string, long> emVars = new System.Collections.Generic.Dictionary<string, long>(System.StringComparer.OrdinalIgnoreCase);
+        static long GetVarOrDefault(string name, out bool exists)
+        {
+            if (emVars.TryGetValue(name, out long v)) { exists = true; return v; }
+            exists = false; return 0L;
+        }
         #region CSVデータ関係
         private sealed class GetcharaMethod : FunctionMethod
         {

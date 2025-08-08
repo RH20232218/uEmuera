@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using MinorShift.Emuera;
 using MinorShift.Emuera.GameView;
-using uEmuera;
 
 public class EmueraContent : MonoBehaviour
 {
@@ -199,8 +198,7 @@ public class EmueraContent : MonoBehaviour
         if(remove_count > 0)
             display_lines_.RemoveRange(count - remove_count, remove_count);
 
-        if (image_removelist == null)
-            image_removelist = new List<EmueraImage>();
+        List<EmueraImage> image_removelist = null;
         var display_iter = display_images_.GetEnumerator();
         while(display_iter.MoveNext())
         {
@@ -208,12 +206,14 @@ public class EmueraContent : MonoBehaviour
             if(image.logic_y > pos.y + display_height ||
                 image.logic_y + image.logic_height < pos.y)
             {
+                if(image_removelist == null)
+                    image_removelist = new List<EmueraImage>();
                 image_removelist.Add(image);
             }
             else
                 image.SetPosition(pos.x + image.unit_desc.posx, pos.y - image.logic_y);
         }
-        if(image_removelist.Count > 0)
+        if(image_removelist != null)
         {
             var listcount = image_removelist.Count;
             EmueraImage image = null;
@@ -223,7 +223,6 @@ public class EmueraContent : MonoBehaviour
                 PushImageContainer(image);
                 display_images_.Remove(image.LineNo * 1000 + image.UnitIdx);
             }
-            image_removelist.Clear();
         }
 
         var index = GetLineNoIndex(min_line_no - 1);
@@ -249,430 +248,550 @@ public class EmueraContent : MonoBehaviour
     void UpdateLine(Vector2 local, float display_height, int index, int delta)
     {
         var zero = begin_index;
-        var max = end_index;
-        while(index >= zero && index < max)
+        while(zero <= index && index < end_index)
         {
-            var line_desc = console_lines_[index % max_log_count];
-            var y = line_desc.position_y;
-            if(y > local.y + display_height || y + line_desc.height < local.y)
+            var l = console_lines_[index % max_log_count];
+            if(l.position_y > local.y + display_height ||
+                l.position_y + l.height < local.y)
                 break;
-            var line = PullLine();
-            line.logic_y = y;
-            line.logic_height = line_desc.height;
-            line.line_desc = line_desc;
-            line.UnitIdx = 0; // Set appropriate unit index
-            if (line_desc.units != null && line_desc.units.Count > 0)
-                line.Width = line_desc.units[0].width; // Set width from first unit
-            else
-                line.Width = 0;
-            line.UpdateContent();
-            display_lines_.Add(line);
-            line.SetPosition(local.x + line.unit_desc.posx, local.y - y);
-            
-            // Handle images if they exist
-            if (line_desc.units != null && line_desc.units.Count > 0)
+
+            for(int li = 0; li < l.units.Count; ++li)
             {
-                var image_indices = line_desc.units[0].image_indices;
-                if(image_indices != null && image_indices.Count > 0)
+                var unit = l.units[li];
+                if(!unit.empty)
                 {
-                    var image = PullImageContainer();
-                    image.logic_y = y;
-                    image.logic_height = line_desc.height;
-                    image.line_desc = line_desc;
-                    image.UnitIdx = 0;
-                    image.Width = line_desc.units[0].width;
-                    image.UpdateContent();
-                    image.SetPosition(local.x + image.unit_desc.posx, local.y - y);
-                    display_images_[image.LineNo * 1000 + 0] = image;
+                    var lc = PullLine();
+                    lc.line_desc = l;
+                    lc.UnitIdx = li;
+                    lc.Width = unit.width;
+                    lc.UpdateContent();
+                    lc.SetPosition(unit.posx + local.x, local.y - lc.logic_y);
+                    display_lines_.Add(lc);
+                }
+                if(unit.image_indices != null && unit.image_indices.Count > 0)
+                {
+                    var hash = l.LineNo * 1000 + li;
+                    EmueraImage ic = null;
+                    if(!display_images_.TryGetValue(hash, out ic))
+                    {
+                        ic = PullImageContainer();
+                        display_images_.Add(l.LineNo * 1000 + li, ic);
+                    }
+                    else
+                        ic.Clear();
+                    ic.line_desc = l;
+                    ic.UnitIdx = li;
+                    ic.Width = unit.width;
+                    ic.UpdateContent();
+                    ic.SetPosition(unit.posx + local.x, local.y - ic.logic_y);
                 }
             }
             index += delta;
         }
     }
-
     Vector2 GetLimitPosition(Vector2 local,
         float display_width, float display_height)
     {
-        if (content_width < display_width)
-            local.x = 0;
-        else if (local.x > 0)
-            local.x = 0;
-        else if (local.x < display_width - content_width)
-            local.x = display_width - content_width;
-
-        if (content_height < display_height)
+        if(content_width > display_width)
         {
-            if (offset_height < 0)
-                local.y = 0;
-            else
-                local.y = offset_height;
+            //左右移动
+            if(local.x > 0)
+                local.x = 0;
+            else if(local.x < display_width - content_width)
+                local.x = display_width - content_width;
+        }
+        else
+            local.x = 0;
+
+        var valid_height = content_height - offset_height;
+        if(offset_height > 0 && valid_height < display_height)
+        {
+            local.y = offset_height;
         }
         else
         {
-            if (local.y < offset_height)
+            var display_delta = content_height - display_height;
+            if(content_height <= display_height)
+                local.y = display_delta;
+            else if(local.y > display_delta)
+                local.y = display_delta;
+            else if(local.y < offset_height)
                 local.y = offset_height;
-            else if (local.y > content_height - display_height)
-                local.y = content_height - display_height;
         }
+
         return local;
     }
-
-    List<EmueraImage> image_removelist;
-
     public void SetDirty()
     {
         dirty = true;
+        //ToBottom();
     }
-    bool dirty = false;
 
+    bool dirty = false;
+    uint last_click_tic = 0;
     void OnBeginDrag(UnityEngine.EventSystems.PointerEventData e)
     {
         drag_begin_position = e.position;
-        drag_delta = Vector2.zero;
+        drag_curr_position = e.position;
+        drag_delta = Vector3.zero;
     }
-
     void OnDrag(UnityEngine.EventSystems.PointerEventData e)
     {
+        dirty = true;
         drag_curr_position = e.position;
+        drag_delta = Vector3.zero;
     }
-
     void OnEndDrag(UnityEngine.EventSystems.PointerEventData e)
     {
-        drag_delta = e.position - drag_begin_position;
-        local_position += drag_curr_position - drag_begin_position;
-        local_position = GetLimitPosition(local_position, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        dirty = true;
+        float display_width = DISPLAY_WIDTH;
+        float display_height = DISPLAY_HEIGHT;
+        local_position = GetLimitPosition(
+            local_position + (e.position - drag_begin_position),
+            display_width, display_height);
+
+        drag_delta = e.position - drag_curr_position;
         drag_begin_position = Vector2.zero;
         drag_curr_position = Vector2.zero;
     }
-
     void OnClick()
     {
-        //Debug.Log("OnClick");
+        var nowtick = MinorShift._Library.WinmmTimer.TickCount;
+        var skipflag = (nowtick - last_click_tic < 200);
+        EmueraThread.instance.Input("", false, skipflag);
+        last_click_tic = nowtick;
     }
-
     Vector2 drag_begin_position = Vector2.zero;
     Vector2 drag_curr_position = Vector2.zero;
     Vector2 drag_delta = Vector2.zero;
 
     public void SetBackgroundColor(uEmuera.Drawing.Color color)
     {
+        if(background_color == color)
+            return;
+        background.color = GenericUtils.ToUnityColor(color);
         background_color = color;
-        if(color.A == 0)
-            background.enabled = false;
-        else
-            background.enabled = true;
-        background.color = new Color32((byte)color.R, (byte)color.G, (byte)color.B, (byte)color.A);
+        main_camere.backgroundColor = background.color;
     }
-
     public void Ready()
     {
-        console_lines_ = new List<EmueraBehaviour.LineDesc>();
-        begin_index = 0;
-        end_index = 0;
-        max_index = 0;
-        invalid_count = 0;
-        offset_height = 0;
-        content_width = 0;
-        content_height = 0;
-        local_position = Vector2.zero;
-        last_button_generation = 0;
-        while (cache_lines_.Count > 0)
-            GameObject.Destroy(cache_lines_.Dequeue().gameObject);
-        while (cache_image_containers_.Count > 0)
-            GameObject.Destroy(cache_image_containers_.Pop().gameObject);
-        while (cache_images_.Count > 0)
-            GameObject.Destroy(cache_images_.Pop().gameObject);
+        EmueraBehaviour.Ready();
+        option_window.Ready();
+        option_window.gameObject.SetActive(true);
 
-        ready_ = true;
+        background.color = GenericUtils.ToUnityColor(Config.BackColor);
+        background_color = Config.BackColor;
+        content_width = Config.WindowX;
+
+        FontUtils.SetDefaultFont(Config.FontName);
+
+        template_text.color = EmueraBehaviour.FontColor;
+        template_text.font = FontUtils.default_font;
+        if(template_text.font == null)
+            template_text.font = FontUtils.default_font;
+        template_text.fontSize = EmueraBehaviour.FontSize;
+        template_text.rectTransform.sizeDelta =
+            new Vector2(template_text.rectTransform.sizeDelta.x, 0);
+        template_text.gameObject.SetActive(false);
+
+        console_lines_ = new List<EmueraBehaviour.LineDesc>(max_log_count);
+        while(console_lines_.Count < max_log_count)
+            console_lines_.Add(null);
+        invalid_count = max_log_count;
     }
-
     public void SetNoReady() { ready_ = false; }
     bool ready_ = false;
 
     public void Clear()
     {
-        if (!ready_)
-            return;
-        for (int i = 0; i < display_lines_.Count; ++i)
+        invalid_count = max_log_count;
+        max_index = 0;
+        for(int i = 0; i < console_lines_.Count; ++i)
+            console_lines_[i] = null;
+
+        for(int i = 0; i < display_lines_.Count; ++i)
+        {
             PushLine(display_lines_[i]);
+        }
+
         display_lines_.Clear();
 
-        var display_iter = display_images_.GetEnumerator();
-        while (display_iter.MoveNext())
-            PushImageContainer(display_iter.Current.Value);
-        display_images_.Clear();
+        var iter = cache_lines_.GetEnumerator();
+        while(iter.MoveNext())
+            GameObject.Destroy(iter.Current.gameObject);
+        var iter2 = cache_images_.GetEnumerator();
+        while(iter2.MoveNext())
+            GameObject.Destroy(iter2.Current.gameObject);
 
-        console_lines_.Clear();
-        begin_index = 0;
-        end_index = 0;
-        max_index = 0;
-        invalid_count = 0;
-        offset_height = 0;
-        content_width = 0;
+        cache_lines_.Clear();
+        cache_images_.Clear();
+
         content_height = 0;
+        offset_height = 0;
         local_position = Vector2.zero;
-        last_button_generation = 0;
-
-        SetDirty();
+        drag_delta = Vector2.zero;
+        dirty = true;
     }
-
     public void AddLine(object line, bool roll_to_bottom = false)
     {
-        if (!ready_)
+        if(line == null)
             return;
-        var line_desc = (EmueraBehaviour.LineDesc)line;
-        console_lines_.Add(line_desc);
-        end_index++;
-
-        float w = 0;
-        if (line_desc.units != null)
+        if(!ready_)
         {
-            foreach (var unit in line_desc.units)
-            {
-                var unit_end_x = unit.posx + unit.width;
-                if (w < unit_end_x)
-                    w = unit_end_x;
-            }
+            Ready();
+            ready_ = true;
         }
-        if (content_width < w)
-            content_width = w;
+        var ld = new EmueraBehaviour.LineDesc(line, content_height, Config.LineHeight);
 
-        line_desc.position_y = content_height;
-        content_height += line_desc.height;
-        max_index = console_lines_.Count;
+        console_lines_[max_index % max_log_count] = ld;
+        if(invalid_count > 0)
+            invalid_count -= 1;
+        //添加偏移高
+        if(valid_count >= max_log_count)
+            offset_height += Config.LineHeight;
+        max_index += 1;
 
-        if (roll_to_bottom)
-            ToBottom();
-        SetDirty();
-    }
-
-    public object GetLine(int index)
-    {
-        if(index < 0 || index >= console_lines_.Count)
-            return null;
-        return console_lines_[index];
-    }
-
-    public int GetLineCount()
-    {
-        return console_lines_.Count;
-    }
-
-    public int GetMinLineNo()
-    {
-        if (console_lines_.Count == 0)
-            return -1;
-        return console_lines_[begin_index].LineNo;
-    }
-
-    public int GetMaxLineNo()
-    {
-        if (console_lines_.Count == 0)
-            return -1;
-        return console_lines_[end_index - 1].LineNo;
-    }
-
-    public void RemoveLine(int count)
-    {
-        if (!ready_)
-            return;
-        if (count == 0)
-            return;
-        if(count > valid_count)
-            count = valid_count;
-
-        var new_begin = begin_index + count;
-        float remove_height = 0;
-        int i;
-        for(i=begin_index; i<new_begin; ++i)
+        ld.Update();
+        
+        //添加容器高
+        content_height += Config.LineHeight;
+        if(roll_to_bottom)
         {
-            var line = console_lines_[i % max_log_count];
-            if (!line.IsLogicalLine)
-                invalid_count--;
-            remove_height += line.height;
-        }
-
-        begin_index = new_begin;
-        offset_height += remove_height;
-
-        //for (i = begin_index; i < end_index; ++i)
-        //{
-        //    var line = console_lines_[i % max_log_count];
-        //    line.position_y -= remove_height;
-        //}
-
-        //if(begin_index > max_log_count && end_index > max_log_count)
-        //{
-        //    begin_index -= max_log_count;
-        //    end_index -= max_log_count;
-        //}
-    }
-
-    public void ToBottom()
-    {
-        var display_height = DISPLAY_HEIGHT;
-        if (content_height < display_height)
-        {
-            if (offset_height < 0)
-                local_position = new Vector2(local_position.x, 0);
-            else
-                local_position = new Vector2(local_position.x, offset_height);
+            local_position.y = content_height - rect_transform.rect.height;
+            drag_delta.y = 0;
         }
         else
-            local_position = new Vector2(local_position.x, content_height - display_height);
+        {
+            drag_delta.y += Config.LineHeight * 1.5f;
+        }
+        dirty = true;
     }
+    public object GetLine(int index)
+    {
+        if(index < begin_index || index >= end_index)
+            return null;
+        return console_lines_[index % max_log_count].console_line;
+    }
+    public int GetLineCount()
+    {
+        return valid_count;
+    }
+    public int GetMinLineNo()
+    {
+        return begin_index;
+    }
+    public int GetMaxLineNo()
+    {
+        if(valid_count == 0)
+            return -1;
+        return max_index;
+    }
+    public void RemoveLine(int count)
+    {
+        if(!ready_)
+        {
+            Ready();
+            ready_ = true;
+        }
+        if(count > valid_count)
+            count = valid_count;
+        if(count == 0)
+            return;
 
+        var lineno = console_lines_[(max_index - count) % max_log_count].LineNo;
+        display_lines_.Sort((l, r) =>
+        {
+            return (l.LineNo * 10 + l.UnitIdx) -
+                (r.LineNo * 10 + r.UnitIdx);
+        });
+
+        var i = 0;
+        for(; i < display_lines_.Count; ++i)
+        {
+            if(display_lines_[i].LineNo >= lineno)
+                break;
+        }
+        List<int> imageremove = new List<int>();
+
+        var iter = display_images_.GetEnumerator();
+        while(iter.MoveNext())
+        {
+            var image = iter.Current;
+            if(image.Key / 1000 >= lineno)
+            {
+                PushImageContainer(image.Value);
+                imageremove.Add(image.Key);
+            }
+        }
+        var remove = imageremove.Count;
+        for(var j=0; j<remove; ++j)
+        {
+            display_images_.Remove(imageremove[j]);
+        }
+
+        remove = 0;
+        for(; i < display_lines_.Count; ++i, ++remove)
+        {
+            PushLine(display_lines_[i]);
+        }
+        if(remove > 0)
+        {
+            if(remove >= display_lines_.Count)
+                display_lines_.Clear();
+            else
+                display_lines_.RemoveRange(display_lines_.Count - remove, remove);
+        }
+
+        var eidx = end_index - 1;
+        var bidx = end_index - count ;
+        for(i = eidx; i >= bidx; --i)
+            console_lines_[i % max_log_count] = null;
+
+        content_height -= Config.LineHeight * count;
+        if(count >= valid_count)
+        {
+            offset_height = 0;
+            content_height = 0;
+        }
+        else if(max_index > max_log_count)
+        {
+            if(max_index - count <= max_log_count)
+            {
+                //offset_height -= Config.LineHeight * (max_index - max_log_count);
+                //offset_height = Config.LineHeight * (max_index - max_log_count);
+                var l = console_lines_[max_index - count - 1];
+                offset_height = l.position_y + l.height;
+            }
+        }
+
+        invalid_count += count;
+        max_index -= count;
+        dirty = true;
+    }
+    public void ToBottom()
+    {
+        local_position.y = content_height - rect_transform.rect.height;
+        drag_delta = Vector2.zero;
+        dirty = true;
+        Update();
+    }
     public void ShowIsInProcess(bool value)
     {
-        option_window.ShowInProgress(value);
+        option_window.inprogress.SetActive(value);
     }
-
     public void SetLastButtonGeneration(int generation)
     {
-        if (last_button_generation == generation)
-            return;
         last_button_generation = generation;
 
-        var display_iter = display_images_.GetEnumerator();
-        while (display_iter.MoveNext())
+        var quick_buttons = option_window.quick_buttons;
+        if(quick_buttons.IsShow)
         {
-            var image = display_iter.Current.Value;
-            var button = image.GetComponent<Button>();
-            if (button != null)
-                button.SetGray(true);
+            quick_buttons.Clear();
+            if(last_button_generation < 0)
+                return;
+
+            for(int i = end_index - 1; i >= begin_index; --i)
+            {
+                var cl = console_lines_[i%max_log_count];
+                if(cl.units == null)
+                    continue;
+                var bl = 0;
+                for(int j = 0; j < cl.units.Count; ++j)
+                {
+                    var cu = cl.units[j];
+                    if(cu.isbutton)
+                    {
+                        if(cu.generation != last_button_generation)
+                            return;
+                        if(cu.empty)
+                            continue;
+                        quick_buttons.AddButton(cu.content, cu.color, cu.code);
+                        bl += 1;
+                    }
+                }
+                if(bl > 0)
+                    quick_buttons.ShiftLine();    
+            }
         }
     }
 
     public int button_generation { get { return last_button_generation; } }
-    
-    //public float Scale { get; private set; }
-
+#if UNITY_EDITOR
+    public
+#endif
     int last_button_generation = 0;
     int max_index = 0;
     int invalid_count = 0;
     int begin_index
     {
-        get { return console_lines_.Count > max_log_count ? console_lines_.Count - max_log_count : 0; }
-        set { }
-        //get { return begin_index_; }
-        //set { begin_index_ = value; }
+        get
+        {
+            return System.Math.Max(0, max_index - valid_count);
+        }
     }
     int end_index
     {
-        get { return console_lines_.Count; }
-        set { }
-        //get { return end_index_; }
-        //set { end_index_ = value; }
+        get
+        {
+            return max_index;
+        }
     }
     int valid_count
     {
-        get { return end_index - begin_index - invalid_count; }
+        get
+        {
+            return max_log_count - invalid_count;
+        }
     }
-    //int begin_index_ = 0;
-    //int end_index_ = 0;
-
     public int max_log_count { get { return MinorShift.Emuera.Config.MaxLog; } }
     List<EmueraBehaviour.LineDesc> console_lines_;
 
-    //public void SetScale(float scale)
+    //RectTransform parent
     //{
-    //    Scale = scale;
-    //    rect_transform.localScale = new Vector3(scale, scale, 1);
+    //    get
+    //    {
+    //        if(parent_ == null)
+    //        {
+    //            parent_ = transform.parent as RectTransform;
+    //            while(parent_.parent != null)
+    //            {
+    //                parent_ = parent_.parent as RectTransform; ;
+    //            }
+    //        }
+    //        return parent_;
+    //    }
     //}
-    
+    //RectTransform parent_;
+    //float DISPLAY_WIDTH { get { return parent.sizeDelta.x; } }
+    //float DISPLAY_HEIGHT { get { return parent.sizeDelta.y; } }
     float DISPLAY_WIDTH { get { return rect_transform.rect.width; } }
     float DISPLAY_HEIGHT { get { return rect_transform.rect.height; } }
 
-    //public float ScaledDisplayHeight { get { return rect_transform.rect.height / Scale; } }
-
+    /// <summary>
+    /// 偏移高
+    /// </summary>
     float offset_height = 0;
-
+    /// <summary>
+    /// 内容宽
+    /// </summary>
     float content_width = 0;
-
+    /// <summary>
+    /// 内容高
+    /// </summary>
     float content_height = 0;
-
+    /// <summary>
+    /// 当前移动点
+    /// </summary>
     Vector2 local_position = Vector2.zero;
 
     List<EmueraLine> display_lines_ = new List<EmueraLine>();
     Dictionary<int, EmueraImage> display_images_ = new Dictionary<int, EmueraImage>();
-    //Dictionary<string, Sprite> sprite_cache_ = new Dictionary<string, Sprite>();
-
-    
+    /// <summary>
+    /// 获取文本显示控件
+    /// </summary>
+    /// <returns></returns>
     EmueraLine PullLine()
     {
-        if (cache_lines_.Count > 0)
-        {
-            var line = cache_lines_.Dequeue();
-            line.gameObject.SetActive(true);
-            return line;
-        }
+        EmueraLine line = null;
+        if(cache_lines_.Count > 0)
+            line = cache_lines_.Dequeue();
         else
         {
-            var text = (Text)GameObject.Instantiate(template_text);
-            text.transform.SetParent(text_content, false);
-            var line = text.gameObject.AddComponent<EmueraLine>();
-            return line;
+            var obj = GameObject.Instantiate(template_text.gameObject);
+            line = obj.GetComponent<EmueraLine>();
+            line.transform.SetParent(text_content);
+            line.transform.localScale = Vector3.one;
+            line.gameObject.SetActive(true);
         }
+        //line.size_fitter.enabled = true;
+        //line.monospaced.enabled = true;
+        //line.gameObject.SetActive(true);  
+        return line;
     }
-
+    /// <summary>
+    /// 交还文本显示控件
+    /// </summary>
+    /// <param name="line"></param>
     void PushLine(EmueraLine line)
     {
-        line.gameObject.SetActive(false);
-        var button = line.GetComponent<Button>();
-        if(button != null)
-            GameObject.Destroy(button);
+        line.Clear();
+        //line.gameObject.SetActive(false);
+
+        //line.size_fitter.enabled = false;
+        //line.monospaced.enabled = false;
+        //line.text.text = string.Empty;
+        //line.rect_transform.sizeDelta = Vector2.zero;
+        line.rect_transform.position = new Vector3(-10000, 0, 0);
+
+#if UNITY_EDITOR
+        line.gameObject.name = "unused";
+#endif
         cache_lines_.Enqueue(line);
     }
-    
     Queue<EmueraLine> cache_lines_ = new Queue<EmueraLine>();
 
-
+    /// <summary>
+    /// 获取图片显示控件
+    /// </summary>
+    /// <returns></returns>
     EmueraImage PullImageContainer()
     {
+        EmueraImage image = null;
         if(cache_image_containers_.Count > 0)
-        {
-            var image = cache_image_containers_.Pop();
-            image.gameObject.SetActive(true);
-            return image;
-        }
+            image = cache_image_containers_.Pop();
         else
         {
-            var image_transform = (RectTransform)GameObject.Instantiate(template_images);
-            image_transform.SetParent(image_content, false);
-            var image = image_transform.gameObject.AddComponent<EmueraImage>();
-            return image;
+            var obj = GameObject.Instantiate(template_images.gameObject);
+            image = obj.GetComponent<EmueraImage>(); 
         }
+        image.transform.SetParent(image_content);
+        image.transform.localScale = Vector3.one;
+        image.gameObject.SetActive(true);
+        return image;
     }
+    /// <summary>
+    /// 交还图片显示控件
+    /// </summary>
+    /// <param name="image"></param>
     void PushImageContainer(EmueraImage image)
     {
+        image.Clear();
         image.gameObject.SetActive(false);
-        var button = image.GetComponent<Button>();
-        if (button != null)
-            GameObject.Destroy(button);
+#if UNITY_EDITOR
+        image.gameObject.name = "unused";
+#endif
+        image.transform.SetParent(cache_images);
         cache_image_containers_.Push(image);
     }
     Stack<EmueraImage> cache_image_containers_ = new Stack<EmueraImage>();
 
     public Image PullImage()
     {
-        if (cache_images_.Count > 0)
-        {
-            var image = cache_images_.Pop();
-            image.gameObject.SetActive(true);
-            return image;
-        }
+        Image image = null;
+        if(cache_images_.Count > 0)
+            image = cache_images_.Pop();
         else
         {
-            var image_go = new GameObject();
-            var image = image_go.AddComponent<Image>();
-            return image;
+            var obj = new GameObject();
+            image = obj.AddComponent<Image>();
+            image.transform.SetParent(cache_images);
+            var rt = image.transform as RectTransform;
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(0, 1);
+            rt.pivot = new Vector2(0, 1);
+            rt.localScale = Vector3.one;
         }
+        image.gameObject.SetActive(true);
+        return image;
     }
     public void PushImage(Image image)
     {
-        if(image.gameObject.transform.parent != cache_images)
-            image.gameObject.transform.SetParent(cache_images, false);
         image.gameObject.SetActive(false);
+#if UNITY_EDITOR
+        image.gameObject.name = "unused";
+#endif
+        image.sprite = null;
+        image.transform.SetParent(cache_images);
         cache_images_.Push(image);
     }
     Stack<Image> cache_images_ = new Stack<Image>();

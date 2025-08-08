@@ -57,9 +57,10 @@ internal static class SpriteManager
         }
         public void Dispose()
         {
-            foreach (var sprite in sprites.Values)
+            var iter = sprites.Values.GetEnumerator();
+            while(iter.MoveNext())
             {
-                sprite.Dispose();
+                iter.Current.Dispose();
             }
             sprites.Clear();
             sprites = null;
@@ -341,17 +342,17 @@ internal static class SpriteManager
 
             var now = Time.unscaledTime;
             TextureInfo tinfo = null;
-            
-            // Use foreach instead of manual enumerator for better performance
-            foreach (var ti in texture_dict.Values)
+            TextureInfo ti = null;
+            var iter = texture_dict.Values.GetEnumerator();
+            while(iter.MoveNext())
             {
+                ti = iter.Current;
                 if(ti.refcount == 0 && now > ti.pasttime)
                 {
                     tinfo = ti;
                     break;
                 }
             }
-            
             if(tinfo != null)
             {
                 Debug.Log("Unload Texture " + tinfo.imagename);
@@ -360,7 +361,7 @@ internal static class SpriteManager
                 texture_dict.Remove(tinfo.imagename);
                 tinfo = null;
 
-                //GC.Collect(); // Commented out for better performance
+                GC.Collect();
             }
         }
     }
@@ -377,9 +378,11 @@ internal static class SpriteManager
             TextureInfo ti = null;
             if(texture_other_threads.Count > 0)
             {
-                // Use foreach for better performance
-                foreach (var tiot in texture_other_threads)
+                TextureInfoOtherThread tiot = null;
+                var tiotiter = texture_other_threads.GetEnumerator();
+                while(tiotiter.MoveNext())
                 {
+                    tiot = tiotiter.Current;
                     tiot.mutex = new System.Threading.Mutex(true);
                     //tiot.mutex.WaitOne();
                     ti = GetTextureInfo(tiot.name, tiot.path);
@@ -390,9 +393,11 @@ internal static class SpriteManager
             }
             if(render_texture_other_threads.Count > 0)
             {
-                // Use foreach for better performance
-                foreach (var rtot in render_texture_other_threads)
+                RenderTextureOtherThread rtot = null;
+                var rtotiter = render_texture_other_threads.GetEnumerator();
+                while(rtotiter.MoveNext())
                 {
+                    rtot = rtotiter.Current;
                     rtot.mutex = new System.Threading.Mutex(true);
                     //tiot.mutex.WaitOne();
                     var rt = new RenderTexture(rtot.x, rtot.y, 24, RenderTextureFormat.ARGB32);
@@ -405,12 +410,13 @@ internal static class SpriteManager
     }
     internal static void ForceClear()
     {
-        foreach (var textureInfo in texture_dict.Values)
+        var iter = texture_dict.Values.GetEnumerator();
+        while(iter.MoveNext())
         {
-            textureInfo.Dispose();
+            iter.Current.Dispose();
         }
         texture_dict.Clear();
-        //GC.Collect(); // Commented out for better performance
+        GC.Collect();
     }
     internal static void SetResourceCSVLine(string filename, string[] lines)
     {

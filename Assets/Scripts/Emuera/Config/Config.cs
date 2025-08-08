@@ -311,10 +311,9 @@ namespace MinorShift.Emuera
 				return false;
 			}
 
-			bool updated = true;
-			long key = getUpdateKey();
-			updated = LastKey != key;
-			LastKey = key;
+            long key = getUpdateKey();
+            bool updated = LastKey != key;
+            LastKey = key;
 			return updated;
 		}
 

@@ -861,6 +861,79 @@ namespace MinorShift.Emuera.GameProc.Function
 			}
 		}
 
+		// --- EM/EE compat: audio controls ---
+		private sealed class PLAYBGM_Instruction : AbstractInstruction
+		{
+			public PLAYBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR); flag = EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				string path = ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
+				uEmuera.Media.Audio.PlayBGM(path);
+			}
+		}
+		private sealed class STOPBGM_Instruction : AbstractInstruction
+		{
+			public STOPBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { uEmuera.Media.Audio.StopBGM(); }
+		}
+		private sealed class PLAYSOUND_Instruction : AbstractInstruction
+		{
+			public PLAYSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR); flag = EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				string path = ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
+				uEmuera.Media.Audio.PlaySE(path);
+			}
+		}
+		private sealed class STOPSOUND_Instruction : AbstractInstruction
+		{
+			public STOPSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { uEmuera.Media.Audio.StopSE(); }
+		}
+		private sealed class SETBGMVOLUME_Instruction : AbstractInstruction
+		{
+			public SETBGMVOLUME_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				int vol = (int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm);
+				uEmuera.Media.Audio.SetBGMVolume(vol);
+			}
+		}
+		private sealed class SETSOUNDVOLUME_Instruction : AbstractInstruction
+		{
+			public SETSOUNDVOLUME_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				int vol = (int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm);
+				uEmuera.Media.Audio.SetSEVolume(vol);
+			}
+		}
+
+		// TRY variants for CALLF
+		private sealed class TRYCALLF_Instruction : CALLF_Instruction
+		{
+			public TRYCALLF_Instruction(bool form) : base(form) { flag |= IS_TRY; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				try { base.DoInstruction(exm, func, state); }
+				catch (EmueraException)
+				{
+					if (func.JumpToEndCatch != null)
+						state.JumpTo(func.JumpToEndCatch);
+				}
+			}
+		}
+
+		private sealed class QUIT_AND_RESTART_Instruction : AbstractInstruction
+		{
+			public QUIT_AND_RESTART_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = EXTENDED; }
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				// Return to title and re-run title script
+				exm.Console.GotoTitle();
+			}
+		}
+
 		private sealed class BAR_Instruction : AbstractInstruction
 		{
 			public BAR_Instruction(bool newline)

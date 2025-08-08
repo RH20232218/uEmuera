@@ -25,7 +25,7 @@ public class FirstWindow : MonoBehaviour
         ow.ShowInProgress(true);
         yield return null;
 
-        //System.GC.Collect();
+        System.GC.Collect();
         SpriteManager.Init();
 
         Sys.SetWorkFolder(workspace);
@@ -70,9 +70,6 @@ public class FirstWindow : MonoBehaviour
         GetList("storage/sdcard0/emuera");
         GetList("storage/sdcard1/emuera");
         GetList("storage/sdcard2/emuera");
-#endif
-#if UNITY_STANDALONE && !UNITY_EDITOR
-        GetList(Path.GetFullPath(Application.dataPath + "/.."));
 #endif
     }
 
@@ -135,7 +132,7 @@ public class FirstWindow : MonoBehaviour
                     AddItem(path.Substring(workspace.Length + 1), workspace);
             }
         }
-        catch(DirectoryNotFoundException)
+        catch(DirectoryNotFoundException e)
         { }
     }
 

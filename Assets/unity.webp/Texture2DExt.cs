@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -176,10 +177,10 @@ namespace WebP
         {
             List<byte[]> bytes_list = new List<byte[]>();
             lError = 0;
-            //byte[] lRawData = null;
+            byte[] lRawData = null;
             int lLength = lData.Length;
 
-            //WebPAnimDecoderOptions config = new WebPAnimDecoderOptions();
+            WebPAnimDecoderOptions config = new WebPAnimDecoderOptions();
             fixed (byte* p = lData)
             {
                 IntPtr ptr = (IntPtr)p;
@@ -199,10 +200,7 @@ namespace WebP
         /// 
         /// </summary>
         /// <param name="lData"></param>
-        /// <param name="lMipmaps"></param>
-        /// <param name="lLinear"></param>
         /// <param name="lError"></param>
-        /// <param name="scalingFunction"></param>
         /// <returns></returns>
 		public static unsafe Texture2D CreateTexture2DFromWebP(byte[] lData, bool lMipmaps, bool lLinear, out Error lError, ScalingFunction scalingFunction = null )
         {
@@ -252,7 +250,6 @@ namespace WebP
         /// <param name="lTexture2D"></param>
         /// <param name="lData"></param>
         /// <param name="lError"></param>
-        /// <param name="scalingFunction"></param>
         public static unsafe void LoadWebP(this Texture2D lTexture2D, byte[] lData, out Error lError, ScalingFunction scalingFunction = null)
         {
             lError = 0;
@@ -275,7 +272,6 @@ namespace WebP
         /// 
         /// </summary>
         /// <param name="lTexture2D"></param>
-        /// <param name="lQuality"></param>
         /// <param name="lError"></param>
         /// <returns></returns>
         public static unsafe byte[] EncodeToWebP(this Texture2D lTexture2D, float lQuality, out Error lError)

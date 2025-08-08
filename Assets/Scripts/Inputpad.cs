@@ -27,7 +27,7 @@ public class Inputpad : MonoBehaviour
         switch(lastinputtype)
         {
         case MinorShift.Emuera.GameProc.InputType.IntValue:
-            inputfield.contentType = InputField.ContentType.Standard;
+            inputfield.contentType = InputField.ContentType.IntegerNumber;
             inputfield.gameObject.SetActive(true);
             break;
         case MinorShift.Emuera.GameProc.InputType.StrValue:

@@ -115,13 +115,7 @@ public abstract class EmueraBehaviour : MonoBehaviour
                 ud.width = 0;
                 ud.color = FontColor;
                 ud.monospaced = true;
-                
-                // Use cached StringBuilder for better performance
-                if (contentBuilder == null)
-                    contentBuilder = new StringBuilder(256);
-                else
-                    contentBuilder.Clear();
-                    
+                StringBuilder content = new StringBuilder();
                 for(int si = 0; si < btnlength; ++si)
                 {
                     var s = btn.StrArray[si];
@@ -203,14 +197,14 @@ public abstract class EmueraBehaviour : MonoBehaviour
                         else
                             ud.color = fontcolor;
                     }
-                    contentBuilder.Append(str);
+                    content.Append(str);
                     ud.width += uEmuera.Utils.GetDisplayLength(s.Str, fontsize);
                 }
                 ud.empty = (validlength == 0);
                 if(ud.empty)
                     ud.content = null;
                 else
-                    ud.content = contentBuilder.ToString();
+                    ud.content = content.ToString();
                 ud.isbutton = btn.IsButton;
                 ud.generation = (int)btn.Generation;
                 ud.code = btn.Inputs;
@@ -225,10 +219,6 @@ public abstract class EmueraBehaviour : MonoBehaviour
                 units.Add(ud);
             }
         }
-        
-        // Cached StringBuilder for better performance
-        private static StringBuilder contentBuilder;
-
         /// <summary>
         /// 对其方式
         /// </summary>
