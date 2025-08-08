@@ -1698,6 +1698,85 @@ namespace MinorShift.Emuera.GameProc.Function
 			}
 		}
 		
+		// EM/EE audio instruction stubs
+		private sealed class PLAYBGM_Instruction : AbstractInstruction
+		{
+			public PLAYBGM_Instruction()
+			{
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
+				flag = METHOD_SAFE | EXTENDED;
+			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				string path = ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
+				uEmuera.Logger.Info($"PLAYBGM {path}");
+			}
+		}
+		private sealed class STOPBGM_Instruction : AbstractInstruction
+		{
+			public STOPBGM_Instruction()
+			{
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID);
+				flag = METHOD_SAFE | EXTENDED;
+			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				uEmuera.Logger.Info("STOPBGM");
+			}
+		}
+		private sealed class PLAYSOUND_Instruction : AbstractInstruction
+		{
+			public PLAYSOUND_Instruction()
+			{
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.STR_EXPRESSION);
+				flag = METHOD_SAFE | EXTENDED;
+			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				string path = ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
+				uEmuera.Logger.Info($"PLAYSOUND {path}");
+			}
+		}
+		private sealed class STOPSOUND_Instruction : AbstractInstruction
+		{
+			public STOPSOUND_Instruction()
+			{
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID);
+				flag = METHOD_SAFE | EXTENDED;
+			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				uEmuera.Logger.Info("STOPSOUND");
+			}
+		}
+		private sealed class SETBGMVOLUME_Instruction : AbstractInstruction
+		{
+			public SETBGMVOLUME_Instruction()
+			{
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION);
+				flag = METHOD_SAFE | EXTENDED;
+			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				int vol = (int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm);
+				if (vol < 0) vol = 0; if (vol > 100) vol = 100;
+				uEmuera.Logger.Info($"SETBGMVOLUME {vol}");
+			}
+		}
+		private sealed class SETSOUNDVOLUME_Instruction : AbstractInstruction
+		{
+			public SETSOUNDVOLUME_Instruction()
+			{
+				ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION);
+				flag = METHOD_SAFE | EXTENDED;
+			}
+			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			{
+				int vol = (int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm);
+				if (vol < 0) vol = 0; if (vol > 100) vol = 100;
+				uEmuera.Logger.Info($"SETSOUNDVOLUME {vol}");
+			}
+		}
 		private sealed class AWAIT_Instruction : AbstractInstruction
 		{
 			public AWAIT_Instruction()

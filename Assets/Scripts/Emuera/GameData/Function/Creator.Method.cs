@@ -2921,8 +2921,18 @@ namespace MinorShift.Emuera.GameData.Function
 			public HtmlStringLenMethod()
 			{
 				ReturnType = typeof(Int64);
-				argumentTypeArray = new Type[] { typeof(string) };
+				argumentTypeArray = null; // allow 1 or 2 args via custom check
 				CanRestructure = true;
+			}
+			public override string CheckArgumentType(string name, IOperandTerm[] arguments)
+			{
+				if (arguments.Length < 1 || arguments.Length > 2)
+					return name + "関数の引数の数が正しくありません";
+				if (arguments[0] == null || arguments[0].GetOperandType() != typeof(string))
+					return name + "関数の1番目の引数の型が正しくありません";
+				if (arguments.Length == 2 && arguments[1] != null && arguments[1].GetOperandType() != typeof(Int64))
+					return name + "関数の2番目の引数の型が正しくありません";
+				return null;
 			}
 			public override Int64 GetIntValue(ExpressionMediator exm, IOperandTerm[] arguments)
 			{

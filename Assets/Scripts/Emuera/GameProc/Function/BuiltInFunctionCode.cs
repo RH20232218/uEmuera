@@ -358,5 +358,13 @@ namespace MinorShift.Emuera.GameProc.Function
 		PRINT_SPACE,
 
 		INPUTMOUSEKEY,
+
+		// EM/EE compatibility (audio)
+		PLAYBGM,
+		STOPBGM,
+		PLAYSOUND,
+		STOPSOUND,
+		SETBGMVOLUME,
+		SETSOUNDVOLUME,
 	}
 }

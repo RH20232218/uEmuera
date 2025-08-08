@@ -382,6 +382,14 @@ namespace MinorShift.Emuera.GameProc.Function
 
 			addFunction(FunctionCode.INPUTMOUSEKEY, new INPUTMOUSEKEY_Instruction());
 			addFunction(FunctionCode.AWAIT, new AWAIT_Instruction());
+
+			// EM/EE audio commands (stubbed)
+			addFunction(FunctionCode.PLAYBGM, new PLAYBGM_Instruction(), EXTENDED | METHOD_SAFE);
+			addFunction(FunctionCode.STOPBGM, new STOPBGM_Instruction(), EXTENDED | METHOD_SAFE);
+			addFunction(FunctionCode.PLAYSOUND, new PLAYSOUND_Instruction(), EXTENDED | METHOD_SAFE);
+			addFunction(FunctionCode.STOPSOUND, new STOPSOUND_Instruction(), EXTENDED | METHOD_SAFE);
+			addFunction(FunctionCode.SETBGMVOLUME, new SETBGMVOLUME_Instruction(), EXTENDED | METHOD_SAFE);
+			addFunction(FunctionCode.SETSOUNDVOLUME, new SETSOUNDVOLUME_Instruction(), EXTENDED | METHOD_SAFE);
 			#region 式中関数の引数違い
 			addFunction(FunctionCode.VARSIZE, argb[FunctionArgType.SP_VAR], METHOD_SAFE | EXTENDED);//動作が違うのでMETHOD化できない
 			addFunction(FunctionCode.GETTIME, argb[FunctionArgType.VOID], METHOD_SAFE | EXTENDED);//2つに代入する必要があるのでMETHOD化できない

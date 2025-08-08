@@ -108,6 +108,8 @@ namespace MinorShift.Emuera
 			EditorArg = instance.GetConfigValue<string>(ConfigCode.EditorArgument);
 
 			CompatiErrorLine = instance.GetConfigValue<bool>(ConfigCode.CompatiErrorLine);
+			// Force tolerant mode to avoid exit on unknown EM/EE lines while we add compatibility
+			CompatiErrorLine = true;
 			CompatiCALLNAME = instance.GetConfigValue<bool>(ConfigCode.CompatiCALLNAME);
 			UseSaveFolder = instance.GetConfigValue<bool>(ConfigCode.UseSaveFolder);
 			CompatiRAND = instance.GetConfigValue<bool>(ConfigCode.CompatiRAND);
