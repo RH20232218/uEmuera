@@ -100,7 +100,10 @@ public abstract class EmueraBehaviour : MonoBehaviour
         }
         public void Update()
         {
-            units = new List<UnitDesc>();
+            if(units == null)
+                units = new List<UnitDesc>();
+            else
+                units.Clear();
 
             var Buttons = display_line.Buttons;
             for(int i = 0; i < Buttons.Length; ++i)
@@ -115,7 +118,7 @@ public abstract class EmueraBehaviour : MonoBehaviour
                 ud.width = 0;
                 ud.color = FontColor;
                 ud.monospaced = true;
-                StringBuilder content = new StringBuilder();
+                var content = StringBuilderPool.Get();
                 for(int si = 0; si < btnlength; ++si)
                 {
                     var s = btn.StrArray[si];
@@ -217,6 +220,9 @@ public abstract class EmueraBehaviour : MonoBehaviour
                 ud.richedit = richedit;
 
                 units.Add(ud);
+
+                // Return builder to pool
+                StringBuilderPool.Release(content);
             }
         }
         /// <summary>

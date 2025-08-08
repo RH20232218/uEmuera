@@ -149,7 +149,7 @@ public static class GenericUtils
         return fullname;
     }
 
-    public static UnityEngine.Color ToUnityColor(uEmuera.Drawing.Color color)
+    public static UnityEngine.Color ToUnityColor(this uEmuera.Drawing.Color color)
     {
         return new UnityEngine.Color(color.r, color.g, color.b, color.a);
     }
@@ -209,45 +209,35 @@ public static class GenericUtils
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<PointerClickListener>();
-        if(!l)
-            l = obj.AddComponent<PointerClickListener>();
+        var l = GetOrAddCached<PointerClickListener>(obj);
         l.callbacks1.Add(callback);
     }
     public static void SetListenerOnClick(GameObject obj, Action<PointerEventData> callback)
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<PointerClickListener>();
-        if(!l)
-            l = obj.AddComponent<PointerClickListener>();
+        var l = GetOrAddCached<PointerClickListener>(obj);
         l.callbacks2.Add(callback);
     }
     public static void RemoveListenerOnClick(GameObject obj, Action callback)
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<PointerClickListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<PointerClickListener>(obj);
         l.callbacks1.Remove(callback);
     }
     public static void RemoveListenerOnClick(GameObject obj, Action<PointerEventData> callback)
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<PointerClickListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<PointerClickListener>(obj);
         l.callbacks2.Remove(callback);
     }
     public static void RemoveListenerOnClick(GameObject obj)
     {
         if(!obj)
             return;
-        var l = obj.GetComponent<PointerClickListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<PointerClickListener>(obj);
         l.callbacks1 = new HashSet<Action>();
         l.callbacks2 = new HashSet<Action<PointerEventData>>();
     }
@@ -270,27 +260,21 @@ public static class GenericUtils
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<PointerDownListener>();
-        if(!l)
-            l = obj.AddComponent<PointerDownListener>();
+        var l = GetOrAddCached<PointerDownListener>(obj);
         l.callbacks.Add(callback);
     }
     public static void RemoveListenerOnPointerDown(GameObject obj, Action<PointerEventData> callback)
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<PointerDownListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<PointerDownListener>(obj);
         l.callbacks.Remove(callback);
     }
     public static void RemoveListenerOnPointerDown(GameObject obj)
     {
         if(!obj)
             return;
-        var l = obj.GetComponent<PointerDownListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<PointerDownListener>(obj);
         l.callbacks.Clear();
     }
 
@@ -312,27 +296,21 @@ public static class GenericUtils
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<PointerUpListener>();
-        if(!l)
-            l = obj.AddComponent<PointerUpListener>();
+        var l = GetOrAddCached<PointerUpListener>(obj);
         l.callbacks.Add(callback);
     }
     public static void RemoveListenerOnPointerUp(GameObject obj, Action<PointerEventData> callback)
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<PointerUpListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<PointerUpListener>(obj);
         l.callbacks.Remove(callback);
     }
     public static void RemoveListenerOnPointerUp(GameObject obj)
     {
         if(!obj)
             return;
-        var l = obj.GetComponent<PointerUpListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<PointerUpListener>(obj);
         l.callbacks.Clear();
     }
 
@@ -389,27 +367,21 @@ public static class GenericUtils
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<DragListener>();
-        if(!l)
-            l = obj.AddComponent<DragListener>();
+        var l = GetOrAddCached<DragListener>(obj);
         l.callbacks.Add(callback);
     }
     public static void RemoveListenerOnDrag(GameObject obj, Action<PointerEventData> callback)
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<DragListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<DragListener>(obj);
         l.callbacks.Remove(callback);
     }
     public static void RemoveListenerOnDrag(GameObject obj)
     {
         if(!obj)
             return;
-        var l = obj.GetComponent<DragListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<DragListener>(obj);
         l.callbacks.Clear();
     }
     /// <summary>
@@ -421,27 +393,21 @@ public static class GenericUtils
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<BeginDragListener>();
-        if(!l)
-            l = obj.AddComponent<BeginDragListener>();
+        var l = GetOrAddCached<BeginDragListener>(obj);
         l.callbacks.Add(callback);
     }
     public static void RemoveListenerOnBeginDrag(GameObject obj, Action<PointerEventData> callback)
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<BeginDragListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<BeginDragListener>(obj);
         l.callbacks.Remove(callback);
     }
     public static void RemoveListenerOnBeginDrag(GameObject obj)
     {
         if(!obj)
             return;
-        var l = obj.GetComponent<BeginDragListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<BeginDragListener>(obj);
         l.callbacks.Clear();
     }
     /// <summary>
@@ -453,27 +419,21 @@ public static class GenericUtils
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<EndDragListener>();
-        if(!l)
-            l = obj.AddComponent<EndDragListener>();
+        var l = GetOrAddCached<EndDragListener>(obj);
         l.callbacks.Add(callback);
     }
     public static void RemoveListenerOnEndDrag(GameObject obj, Action<PointerEventData> callback)
     {
         if(!obj || callback == null)
             return;
-        var l = obj.GetComponent<EndDragListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<EndDragListener>(obj);
         l.callbacks.Remove(callback);
     }
     public static void RemoveListenerOnEndDrag(GameObject obj)
     {
         if(!obj)
             return;
-        var l = obj.GetComponent<EndDragListener>();
-        if(!l)
-            return;
+        var l = GetOrAddCached<EndDragListener>(obj);
         l.callbacks.Clear();
     }
 
@@ -535,7 +495,7 @@ public static class GenericUtils
         return md5s;
     }
     /// <summary>
-    /// 处理中间的‘：’
+    /// 处理中间的'：'
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
@@ -684,4 +644,34 @@ public static class GenericUtils
         }
     }
     static EmueraContent _text_content = null;
+
+    // ======================================================================
+    // Component caching ----------------------------------------------------
+    // Simple dictionary to store listener components already looked up / added
+    // to avoid expensive GetComponent searches when adding new callbacks.
+    // ======================================================================
+    static readonly Dictionary<int, Dictionary<System.Type, Component>> _componentCache =
+        new Dictionary<int, Dictionary<System.Type, Component>>();
+
+    static T GetOrAddCached<T>(GameObject obj) where T : Component
+    {
+        if(!obj)
+            return null;
+        var id = obj.GetInstanceID();
+        Dictionary<System.Type, Component> map;
+        if(!_componentCache.TryGetValue(id, out map))
+        {
+            map = new Dictionary<System.Type, Component>();
+            _componentCache[id] = map;
+        }
+        Component comp;
+        if(!map.TryGetValue(typeof(T), out comp) || comp == null)
+        {
+            comp = obj.GetComponent<T>();
+            if(!comp)
+                comp = obj.AddComponent<T>();
+            map[typeof(T)] = comp;
+        }
+        return comp as T;
+    }
 }

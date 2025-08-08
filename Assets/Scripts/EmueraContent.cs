@@ -30,6 +30,9 @@ public class EmueraContent : MonoBehaviour
     {
         FontUtils.SetDefaultFont(default_fontname);
         main_camere = GameObject.FindObjectOfType<Camera>();
+
+        // Disable Update() until explicitly needed to reduce per-frame overhead when idle
+        enabled = false;
     }
 
     void Start()
@@ -150,7 +153,11 @@ public class EmueraContent : MonoBehaviour
     public void Update()
     {
         if(!dirty && drag_delta == Vector2.zero)
+        {
+            // No work this frame; suspend further Update calls
+            enabled = false;
             return;
+        }
         dirty = false;
 
         float display_width = DISPLAY_WIDTH;
@@ -324,6 +331,7 @@ public class EmueraContent : MonoBehaviour
     public void SetDirty()
     {
         dirty = true;
+        enabled = true; // ensure Update will run to process the dirty state
         //ToBottom();
     }
 
@@ -334,12 +342,16 @@ public class EmueraContent : MonoBehaviour
         drag_begin_position = e.position;
         drag_curr_position = e.position;
         drag_delta = Vector3.zero;
+
+        enabled = true;
     }
     void OnDrag(UnityEngine.EventSystems.PointerEventData e)
     {
         dirty = true;
         drag_curr_position = e.position;
         drag_delta = Vector3.zero;
+
+        enabled = true;
     }
     void OnEndDrag(UnityEngine.EventSystems.PointerEventData e)
     {
@@ -353,6 +365,8 @@ public class EmueraContent : MonoBehaviour
         drag_delta = e.position - drag_curr_position;
         drag_begin_position = Vector2.zero;
         drag_curr_position = Vector2.zero;
+
+        enabled = true;
     }
     void OnClick()
     {
@@ -431,6 +445,7 @@ public class EmueraContent : MonoBehaviour
         local_position = Vector2.zero;
         drag_delta = Vector2.zero;
         dirty = true;
+        enabled = true;
     }
     public void AddLine(object line, bool roll_to_bottom = false)
     {
@@ -465,6 +480,7 @@ public class EmueraContent : MonoBehaviour
             drag_delta.y += Config.LineHeight * 1.5f;
         }
         dirty = true;
+        enabled = true;
     }
     public object GetLine(int index)
     {
@@ -567,12 +583,14 @@ public class EmueraContent : MonoBehaviour
         invalid_count += count;
         max_index -= count;
         dirty = true;
+        enabled = true;
     }
     public void ToBottom()
     {
         local_position.y = content_height - rect_transform.rect.height;
         drag_delta = Vector2.zero;
         dirty = true;
+        enabled = true;
         Update();
     }
     public void ShowIsInProcess(bool value)

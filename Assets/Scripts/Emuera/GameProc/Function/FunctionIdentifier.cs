@@ -329,6 +329,9 @@ namespace MinorShift.Emuera.GameProc.Function
 			addFunction(FunctionCode.CALLFORM, new CALL_Instruction(true, false, false, false), EXTENDED);
 			addFunction(FunctionCode.TRYJUMPFORM, new CALL_Instruction(true, true, true, false), EXTENDED);
 			addFunction(FunctionCode.TRYCALLFORM, new CALL_Instruction(true, false, true, false), EXTENDED);
+			// EM/EE compatibility: TRYCALLF and TRYCALLFORMF behave like CALLF but with try semantics
+			addFunction(FunctionCode.TRYCALLF, new TRYCALLF_Instruction(false), EXTENDED | IS_TRY);
+			addFunction(FunctionCode.TRYCALLFORMF, new TRYCALLF_Instruction(true), EXTENDED | IS_TRY);
 			addFunction(FunctionCode.TRYCJUMP, new CALL_Instruction(false, true, true, true), EXTENDED);
 			addFunction(FunctionCode.TRYCCALL, new CALL_Instruction(false, false, true, true), EXTENDED);
 			addFunction(FunctionCode.TRYCJUMPFORM, new CALL_Instruction(true, true, true, true), EXTENDED);
@@ -379,17 +382,6 @@ namespace MinorShift.Emuera.GameProc.Function
 
 			addFunction(FunctionCode.INPUTMOUSEKEY, new INPUTMOUSEKEY_Instruction());
 			addFunction(FunctionCode.AWAIT, new AWAIT_Instruction());
-
-			// --- EM/EE extensions (basic compatibility) ---
-			addFunction(FunctionCode.PLAYBGM, new PLAYBGM_Instruction(), EXTENDED);
-			addFunction(FunctionCode.STOPBGM, new STOPBGM_Instruction(), EXTENDED);
-			addFunction(FunctionCode.PLAYSOUND, new PLAYSOUND_Instruction(), EXTENDED);
-			addFunction(FunctionCode.STOPSOUND, new STOPSOUND_Instruction(), EXTENDED);
-			addFunction(FunctionCode.SETBGMVOLUME, new SETBGMVOLUME_Instruction(), EXTENDED);
-			addFunction(FunctionCode.SETSOUNDVOLUME, new SETSOUNDVOLUME_Instruction(), EXTENDED);
-			addFunction(FunctionCode.TRYCALLF, new TRYCALLF_Instruction(false), EXTENDED | IS_TRY);
-			addFunction(FunctionCode.TRYCALLFORMF, new TRYCALLF_Instruction(true), EXTENDED | IS_TRY);
-			addFunction(FunctionCode.QUIT_AND_RESTART, new QUIT_AND_RESTART_Instruction(), EXTENDED);
 			#region 式中関数の引数違い
 			addFunction(FunctionCode.VARSIZE, argb[FunctionArgType.SP_VAR], METHOD_SAFE | EXTENDED);//動作が違うのでMETHOD化できない
 			addFunction(FunctionCode.GETTIME, argb[FunctionArgType.VOID], METHOD_SAFE | EXTENDED);//2つに代入する必要があるのでMETHOD化できない

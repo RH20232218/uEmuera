@@ -203,17 +203,10 @@ static ConfigData() { }
 			AConfigItem item = GetConfigItem(key);
 			if (item == null)
 			{
-				// EM/EE English aliases mapping (e.g., "TEXT COLOR" -> ForeColor)
-				string alias = key.Trim();
-				if (alias.Equals("TEXT COLOR", StringComparison.OrdinalIgnoreCase)) alias = GetConfigItem(ConfigCode.ForeColor).Text;
-				else if (alias.Equals("FONT SIZE", StringComparison.OrdinalIgnoreCase)) alias = GetConfigItem(ConfigCode.FontSize).Text;
-				else if (alias.Equals("フォントサイズ", StringComparison.OrdinalIgnoreCase)) alias = GetConfigItem(ConfigCode.FontSize).Text;
-				else if (alias.Equals("BGMVOLUME", StringComparison.OrdinalIgnoreCase)) alias = GetConfigItem(ConfigCode.FPS).Text; // dummy, not used
-				else if (alias.Equals("SOUNDVOLUME", StringComparison.OrdinalIgnoreCase)) alias = GetConfigItem(ConfigCode.FPS).Text; // dummy, not used
-				item = GetConfigItem(alias) ?? GetReplaceItem(alias);
+				item = GetReplaceItem(key);
 	            if (item == null)
 	            {
-					item = GetDebugItem(alias);
+					item = GetDebugItem(key);
 	            }
 	        }
 			return item;

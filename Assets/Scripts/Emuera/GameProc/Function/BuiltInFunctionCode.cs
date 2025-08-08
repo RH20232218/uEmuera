@@ -151,6 +151,9 @@ namespace MinorShift.Emuera.GameProc.Function
 		GOTOFORM,
 		TRYJUMPFORM,
 		TRYCALLFORM,
+		// EM/EE compatibility: TRY version of CALLF/CALLFORMF
+		TRYCALLF,
+		TRYCALLFORMF,
 		TRYGOTOFORM,
 		CALLTRAIN,
 		STOPCALLTRAIN,
@@ -355,16 +358,5 @@ namespace MinorShift.Emuera.GameProc.Function
 		PRINT_SPACE,
 
 		INPUTMOUSEKEY,
-
-		// Extensions for EM/EE compatibility (minimal stubs)
-		PLAYBGM,
-		STOPBGM,
-		PLAYSOUND,
-		STOPSOUND,
-		SETBGMVOLUME,
-		SETSOUNDVOLUME,
-		TRYCALLF,
-		TRYCALLFORMF,
-		QUIT_AND_RESTART,
 	}
 }

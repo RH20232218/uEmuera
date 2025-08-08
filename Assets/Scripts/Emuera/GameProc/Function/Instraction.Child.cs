@@ -861,76 +861,59 @@ namespace MinorShift.Emuera.GameProc.Function
 			}
 		}
 
-		// --- EM/EE compat: audio controls ---
-		private sealed class PLAYBGM_Instruction : AbstractInstruction
+		// EM/EE compatibility: TRY versions of CALLF/CALLFORMF that do not error when method is missing
+		private sealed class TRYCALLF_Instruction : AbstractInstruction
 		{
-			public PLAYBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR); flag = EXTENDED; }
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			public TRYCALLF_Instruction(bool form)
 			{
-				string path = ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
-				uEmuera.Media.Audio.PlayBGM(path);
+				if (form)
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_CALLFORMF);
+				else
+					ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.SP_CALLF);
+				flag = EXTENDED | METHOD_SAFE | FORCE_SETARG; // IS_TRY is added at registration
 			}
-		}
-		private sealed class STOPBGM_Instruction : AbstractInstruction
-		{
-			public STOPBGM_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = EXTENDED; }
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { uEmuera.Media.Audio.StopBGM(); }
-		}
-		private sealed class PLAYSOUND_Instruction : AbstractInstruction
-		{
-			public PLAYSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.FORM_STR); flag = EXTENDED; }
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
-			{
-				string path = ((ExpressionArgument)func.Argument).Term.GetStrValue(exm);
-				uEmuera.Media.Audio.PlaySE(path);
-			}
-		}
-		private sealed class STOPSOUND_Instruction : AbstractInstruction
-		{
-			public STOPSOUND_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = EXTENDED; }
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state) { uEmuera.Media.Audio.StopSE(); }
-		}
-		private sealed class SETBGMVOLUME_Instruction : AbstractInstruction
-		{
-			public SETBGMVOLUME_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = EXTENDED; }
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
-			{
-				int vol = (int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm);
-				uEmuera.Media.Audio.SetBGMVolume(vol);
-			}
-		}
-		private sealed class SETSOUNDVOLUME_Instruction : AbstractInstruction
-		{
-			public SETSOUNDVOLUME_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.INT_EXPRESSION); flag = EXTENDED; }
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
-			{
-				int vol = (int)((ExpressionArgument)func.Argument).Term.GetIntValue(exm);
-				uEmuera.Media.Audio.SetSEVolume(vol);
-			}
-		}
 
-		// TRY variants for CALLF
-		private sealed class TRYCALLF_Instruction : CALLF_Instruction
-		{
-			public TRYCALLF_Instruction(bool form) : base(form) { flag |= IS_TRY; }
-			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
+			public override void SetJumpTo(ref bool useCallForm, InstructionLine func, int currentDepth, ref string FunctionoNotFoundName)
 			{
-				try { base.DoInstruction(exm, func, state); }
-				catch (EmueraException)
+				if (!func.Argument.IsConst)
 				{
-					if (func.JumpToEndCatch != null)
-						state.JumpTo(func.JumpToEndCatch);
+					useCallForm = true;
+					return;
 				}
+				SpCallFArgment callfArg = (SpCallFArgment)func.Argument;
+				if (Config.ICFunction)
+					callfArg.ConstStr = callfArg.ConstStr.ToUpper();
+				try
+				{
+					callfArg.FuncTerm = GlobalStatic.IdentifierDictionary.GetFunctionMethod(GlobalStatic.LabelDictionary, callfArg.ConstStr, callfArg.RowArgs, true);
+				}
+				catch (CodeEE e)
+				{
+					// TRY: suppress as a warning and continue
+					ParserMediator.Warn(e.Message, func, 2, true, false);
+					return;
+				}
+				// If not found, do nothing (TRY semantics)
 			}
-		}
 
-		private sealed class QUIT_AND_RESTART_Instruction : AbstractInstruction
-		{
-			public QUIT_AND_RESTART_Instruction() { ArgBuilder = ArgumentParser.GetArgumentBuilder(FunctionArgType.VOID); flag = EXTENDED; }
 			public override void DoInstruction(ExpressionMediator exm, InstructionLine func, ProcessState state)
 			{
-				// Return to title and re-run title script
-				exm.Console.GotoTitle();
+				IOperandTerm mToken;
+				string labelName;
+				if ((!func.Argument.IsConst) || (exm.Console.RunERBFromMemory))
+				{
+					SpCallFArgment spCallformArg = (SpCallFArgment)func.Argument;
+					labelName = spCallformArg.FuncnameTerm.GetStrValue(exm);
+					mToken = GlobalStatic.IdentifierDictionary.GetFunctionMethod(GlobalStatic.LabelDictionary, labelName, spCallformArg.RowArgs, true);
+				}
+				else
+				{
+					labelName = func.Argument.ConstStr;
+					mToken = ((SpCallFArgment)func.Argument).FuncTerm;
+				}
+				if (mToken == null)
+					return; // TRY: silently ignore missing method
+				mToken.GetValue(exm);
 			}
 		}
 
